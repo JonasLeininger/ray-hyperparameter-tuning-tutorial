@@ -1,7 +1,7 @@
 import numpy as np
 from ray import tune
 
-from utils.annotations import override
+from lunar.utils.annotations import override
 
 
 class SimpleTrainer(tune.Trainable):
