@@ -14,6 +14,12 @@ gcloud init
 gcloud auth authenticate
 gcloud auth login
 gcloud auth configure-docker
+gcloud auth activate-service-account --key-file=[path to service account json] --project=[cloud project name]
+```
+
+In your .bashrc or .zshrc set the following 
+```sh
+export GOOGLE_APPLICATION_CREDENTIALS="path to service account json"
 ```
 
 ```sh

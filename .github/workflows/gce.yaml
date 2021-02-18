@@ -1,0 +1,59 @@
+name: Build and Deploy to AI Image
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCE_PROJECT }}
+  GCE_USER: ${{ secrets.GCP_USER }}
+  GCE_INSTANCE: ginger-image-builder
+  GCE_INSTANCE_ZONE: europe-west4-a
+  IMAGE_NAME: ${{ secrets.GCE_IMAGE_NAME }}
+  FAMILY: ri-ginger
+
+jobs:
+  setup-build-publish-deploy:
+    name: Build, and Publish image
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, 'BUILD_IMAGE')"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GCE_SA_KEY }}
+        project_id: ${{ secrets.GCE_PROJECT }}
+
+    - name: StartInstance
+      run: |-
+        gcloud compute instances start --zone "$GCE_INSTANCE_ZONE" "$GCE_INSTANCE"
+    
+    - name: PullRepoToInstance
+      run: |
+        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'echo $USER && cd /home/$USER/ginger-ai-test && git pull'
+      
+    - name: InstallPythonPackages
+      run: |
+        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'cd /home/$USER/ginger-ai-test && source /opt/conda/etc/profile.d/conda.sh && conda activate && pip3 install --no-input -r requirements.txt'
+      
+    # - name: CheckTensorflowAndLoadWeights
+    #   run: |
+    #     gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'cd /home/$USER/ginger-ai-test && source /opt/conda/etc/profile.d/conda.sh && conda activate && python3 -m gingerai.resnet'
+    
+    - name: StopInstance
+      run: |-
+        gcloud compute instances stop --zone "$GCE_INSTANCE_ZONE" "$GCE_INSTANCE"
+
+    - name: DeleteImage
+      run: |-
+        gcloud compute images delete "$IMAGE_NAME" -q
+
+    - name: CreateImage
+      run: |-
+        gcloud compute images create "$IMAGE_NAME" --project="$PROJECT_ID" --family="$FAMILY" --source-disk="$GCE_INSTANCE" --source-disk-zone="$GCE_INSTANCE_ZONE" --storage-location=eu
