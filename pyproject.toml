@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "hyperparam-tuning"
+version = "0.1.0"
+description = ""
+authors = ["JonasLeininger <jonas.leininger@rewe-digital.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ray = {extras = ["tune", "rllib", "debug"], version = "1.2.0"}
+tensorboard = "^2.4.1"
+poethepoet = "^0.10.0"
+GPUtil = "^1.4.0"
+cryptography = "^3.4.6"
+google-api-client = "^3.14.159265359"
+google-api-python-client = "^2.0.2"
+hyperopt = "^0.2.5"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poe.tasks]
+force-cuda11 = 'pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 -f https://download.pytorch.org/whl/torch_stable.html'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+resnet18 = "hyperparam_tune.model.resnet18:main"
+trainer = "hyperparam_tune.training.trainer:main"
+tune = "hyperparam_tune.training.tune:main"
