@@ -1,0 +1,27 @@
+batch_size: 128
+batch_split: 1
+max_training_epoch: 50
+# Neural Network params
+learning_rate: 0.001
+weight_init_from: -0.0003
+optimizer_weight_decay: 0.0000
+dropout: 0.5
+# these are more or less fixed parameters
+local_tune_log_dir: tune_logs
+sync_results: False
+device: cuda
+use_tune_tracking: False
+ckpt_dir: "ckpt"
+data_dir: "torch/"
+tensorboard_log_dir: "tb-logs"
+
+cloud_folder: "cifar_10/"
+experiment_name: "weights"
+
+# model input config
+dataset: 'cifar10'
+num_classes: 10
+input_shape: [32, 32, 3]
+model_type: 'resnet18'
+# model_type: 'BiT-M-R50x1'
+bit_model_dir: 'bit_models'

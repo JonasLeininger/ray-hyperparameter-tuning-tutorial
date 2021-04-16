@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "hyperparam-tuning"
+name = "hyperparam-tune"
 version = "0.1.0"
 description = ""
 authors = ["JonasLeininger <jonas.leininger@rewe-digital.com>"]
