@@ -46,13 +46,11 @@ provider:
     type: gcp
     region: europe-west4
     availability_zone: europe-west4-a
-    project_id: [PROJECT_NAME] # Globally unique project id
+    project_id: rd-ri-prototypes-dev # Globally unique project id
 
 # How Ray will authenticate with newly launched nodes.
 auth:
     ssh_user: reweri
-    # ssh_user: jonas.leininger@rewe-digital.com
-    # ssh_private_key: ~/.ssh/
 # By default Ray creates a new private keypair, but you can also use your own.
 # If you do so, make sure to also set "KeyName" in the head and worker node
 # configurations below. This requires that you have added the key into the
@@ -61,15 +59,15 @@ auth:
 
 head_node:
     canIpForward: true
-    machineType: n1-standard-8
+    machineType: n1-standard-32
     disks:
       - boot: true
         autoDelete: true
         type: PERSISTENT
         initializeParams:
-          diskSizeGb: 500
+          diskSizeGb: 1000
           # See https://cloud.google.com/compute/docs/images for more images
-          sourceImage: projects/[PROJECT_NAME]/global/images/IMAGE_NAME
+          sourceImage: projects/rd-ri-prototypes-dev/global/images/ginger-torch-base
     metadata:
       items:
         - key: install-nvidia-driver
@@ -83,7 +81,7 @@ worker_nodes:
     canIpForward: true
     machineType: n1-standard-16
     guestAccelerators:
-      - acceleratorType: projects/[PROJECT_NAME]/zones/europe-west4-a/acceleratorTypes/nvidia-tesla-p100
+      - acceleratorType: projects/rd-ri-prototypes-dev/zones/europe-west4-a/acceleratorTypes/nvidia-tesla-p100
         acceleratorCount: 1
     disks:
       - boot: true
@@ -92,7 +90,7 @@ worker_nodes:
         initializeParams:
           diskSizeGb: 500
           # See https://cloud.google.com/compute/docs/images for more images
-          sourceImage: projects/[PROJECT_NAME]/global/images/IMAGE_NAME
+          sourceImage: projects/rd-ri-prototypes-dev/global/images/ginger-torch-base
     # Run workers on preemtible instance by default.
     # Comment this out to use on-demand.
     metadata:
@@ -118,8 +116,9 @@ file_mounts: {
 initialization_commands: []
 
 # List of shell commands to run to set up nodes.
-setup_commands:
-    - source /opt/conda/etc/profile.d/conda.sh
+setup_commands: []
+
+
 
 # Custom commands that will be run on the head node after common setup.
 head_setup_commands: []
@@ -130,21 +129,31 @@ worker_setup_commands: []
 # Command to start ray on the head node. You don't need to change this.
 head_start_ray_commands:
     - >-
-      cd ginger-ai-test;
-      ray stop;
+      cd ginger-cifar;
+      export PATH="$HOME/.pyenv/bin:$PATH"; 
+      export PATH="$HOME/.poetry/bin:$PATH"; 
+      eval "$(pyenv init -)"; 
+      eval "(pyenv virtualenv-init -)"; 
+      pyenv local 3.8.5;
+      poetry run ray stop;
       export RAY_BACKEND_LOG_LEVEL=debug;
       ulimit -n unlimited;
-      ray start
+      poetry run ray start
       --head
       --port=6379
       --object-manager-port=8076
       --autoscaling-config=~/ray_bootstrap_config.yaml
+
 # Command to start ray on worker nodes. You don't need to change this.
 worker_start_ray_commands:
     - >-
-      cd ginger-ai-test;
-      source /opt/conda/etc/profile.d/conda.sh;
+      cd ginger-cifar;
+      export PATH="$HOME/.pyenv/bin:$PATH"; 
+      export PATH="$HOME/.poetry/bin:$PATH"; 
+      eval "$(pyenv init -)"; 
+      eval "(pyenv virtualenv-init -)"; 
+      pyenv local 3.8.5;
       echo "worker_start_ray_commands";
-      ray stop;
+      poetry run ray stop;
       export RAY_BACKEND_LOG_LEVEL=debug;
-      ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076
+      poetry run ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076
