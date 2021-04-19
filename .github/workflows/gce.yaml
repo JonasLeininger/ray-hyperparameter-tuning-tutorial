@@ -11,7 +11,7 @@ env:
   GCE_INSTANCE: ginger-image-builder
   GCE_INSTANCE_ZONE: europe-west4-a
   IMAGE_NAME: ${{ secrets.GCE_IMAGE_NAME }}
-  FAMILY: ri-ginger
+  FAMILY: FAMILY_NAME
 
 jobs:
   setup-build-publish-deploy:
@@ -36,16 +36,12 @@ jobs:
     
     - name: PullRepoToInstance
       run: |
-        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'echo $USER && cd /home/$USER/ginger-ai-test && git pull'
+        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'echo $USER && cd /home/$USER/[REPO_NAME] && git pull'
       
     - name: InstallPythonPackages
       run: |
-        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'cd /home/$USER/ginger-ai-test && source /opt/conda/etc/profile.d/conda.sh && conda activate && pip3 install --no-input -r requirements.txt'
+        gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'cd /home/$USER/[REPO_NAME] && source /opt/conda/etc/profile.d/conda.sh && conda activate && pip3 install --no-input -r requirements.txt'
       
-    # - name: CheckTensorflowAndLoadWeights
-    #   run: |
-    #     gcloud compute ssh --zone "$GCE_INSTANCE_ZONE" --project "$PROJECT_ID" "$GCE_USER@$GCE_INSTANCE" --command 'cd /home/$USER/ginger-ai-test && source /opt/conda/etc/profile.d/conda.sh && conda activate && python3 -m gingerai.resnet'
-    
     - name: StopInstance
       run: |-
         gcloud compute instances stop --zone "$GCE_INSTANCE_ZONE" "$GCE_INSTANCE"
