@@ -7,7 +7,7 @@ fi
 SOURCE_VM=$1 
 IMAGE_NAME=$2 
 FAMILY=$3 
-
+GCP_PROJECT=[YOUR_GCP_PROJECT]
 # delete image if it already exists
 if [[ "$IMAGE_NAME" == $(gcloud compute images list --format="value(NAME)" --filter="name=(${IMAGE_NAME})") ]]; then
    echo "delete image $IMAGE_NAME"
@@ -15,4 +15,4 @@ if [[ "$IMAGE_NAME" == $(gcloud compute images list --format="value(NAME)" --fil
 fi
 
 # create image
-gcloud compute images create ${IMAGE_NAME} --project=rd-ri-prototypes-dev --family=${FAMILY} --source-disk=${SOURCE_VM} --source-disk-zone=europe-west4-a --storage-location=eu
+gcloud compute images create ${IMAGE_NAME} --project=${GCP_PROJECT} --family=${FAMILY} --source-disk=${SOURCE_VM} --source-disk-zone=europe-west4-a --storage-location=eu

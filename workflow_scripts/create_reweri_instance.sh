@@ -1,9 +1,9 @@
 #!/bin/bash
 
-gcloud compute instances create "BASE INSTANCE FOR GITHUB ACTION" \
+gcloud compute instances create "[BASE_INSTANCE_FOR_GITHUB_ACTION]" \
                          --zone="europe-west4-a" \
-                         --image="IMAGENAME" \
-                         --image-project=rd-ri-prototypes-dev \
+                         --image="[IMAGE_NAME]" \
+                         --image-project=[GCP_PROJECT] \
                          --maintenance-policy=TERMINATE \
                          --boot-disk-size=200GB \
                          --machine-type=n1-standard-8 \
