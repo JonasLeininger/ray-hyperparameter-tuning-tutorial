@@ -118,12 +118,12 @@ In bigger models and training sets we need to change hyperparameters, learning r
 ### Simple Example
 
 Let's say we have the objective:
-Q(theta) = 1.2 - (theta_x^2 - theta_y^2)
+Q(theta) = 1.2 - (theta_x^2 + theta_y^2)
 
 theta are the model parameters. The maximum evaluation score of 1.2 is reached when the thetas are 0.
 
 We get a surrugate Objective:
-Q(theta) = 1.2 - (h_1 * theta_x^2 - h_2 * theta_y^2)
+Q(theta) = 1.2 - (h_1 * theta_x^2 + h_2 * theta_y^2)
 
 With the hyperparameters h. Of course this would be equal to the real objective with h=1.
 We get two workers as resources and our initial guess for the hyperparameters is {h_1=1, h_2=0} and {h_1=0, h_2=1}. We will use grid search, expolore only, exploit only and PBT.
